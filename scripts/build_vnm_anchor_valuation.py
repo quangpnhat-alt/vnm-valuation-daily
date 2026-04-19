@@ -193,6 +193,12 @@ def main() -> int:
         default=None,
         help="Optional path to raw valuation file (default: auto-detect in data/raw/).",
     )
+    parser.add_argument(
+        "--output",
+        dest="output_path",
+        default=None,
+        help="Output parquet path (default: data/processed/vnm_anchor_valuation.parquet).",
+    )
     args = parser.parse_args()
 
     raw_dir = Path("data") / "raw"
@@ -266,7 +272,7 @@ def main() -> int:
     out_df = out_df.sort_values("valuation_date", ascending=True).reset_index(drop=True)
     _validate_output_df(out_df)
 
-    out_path = Path("data") / "processed" / "vnm_anchor_valuation.parquet"
+    out_path = Path(args.output_path) if args.output_path else Path("data") / "processed" / "vnm_anchor_valuation.parquet"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_df.to_parquet(out_path, index=False)
 
