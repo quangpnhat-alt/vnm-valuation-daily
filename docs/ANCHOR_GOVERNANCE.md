@@ -48,7 +48,7 @@ If **`anchor_validated` is missing or empty**, validation falls back to **rules*
 | 3 | Analyst | For an approved snapshot: set **`anchor_validated=true`**, update **`source`** / **`notes`** so they read as **production** (remove unintended **placeholder** wording if you rely on keyword validation). |
 | 4 | Build | Rebuild processed parquet (**required** after any raw change). |
 | 5 | Verify | Run valuation for a realistic **`as_of_date`**; confirm **`anchor_adjusted`** vs **`market_fallback`** (see verification table). |
-| 6 | Optional | Run **`pytest`** so anchor regression and e2e tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`). |
+| 6 | Optional | Run **`pytest`** so anchor regression, e2e, and timeline mini-backtest tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`). |
 
 ---
 
@@ -116,6 +116,35 @@ python scripts/run_local_valuation.py --as-of-date 2026-04-16
 
 ---
 
+## Reviewed timeline mini backtest (deterministic export)
+
+Offline sweep over fixed **`as_of_date`** values using deterministic market / FX / input-cost inputs and the reviewed anchor timeline (aligned with **`data/raw/vnm_anchor_valuation.csv`**). Writes one **audit CSV** per run so you can confirm **latest-on-or-before** selection and **stale** / **validation** behavior without opening pipeline outputs under **`data/processed/`** or **`data/output/`**.
+
+From the project root (after `pip install -e .` if needed):
+
+```bash
+python scripts/run_reviewed_anchor_timeline_backtest.py
+```
+
+Output: **`output/reviewed_anchor_timeline_backtest.csv`** (generated; `*.csv` under **`output/`** is git-ignored—re-run the command to refresh).
+
+Key columns:
+
+| Column | Role |
+|--------|------|
+| `as_of_date` | Run date. |
+| `selected_anchor_date` | Latest anchor **`valuation_date`** on or before `as_of_date` (audit helper). |
+| `anchor_used` | `True` if anchor-adjusted path succeeded. |
+| `anchor_status` | `used`, or e.g. `stale`, `unvalidated`, `missing`. |
+| `valuation_mode` | `anchor_adjusted` or `market_fallback`. |
+| `anchor_error_message` | Empty if anchor used; otherwise explains fallback. |
+
+**Stale fallback example:** If the only reviewed snapshot on or before `as_of_date` is **2026-03-31** but that date is more than **365** days before `as_of_date` (e.g. a far-future run with no newer row), the CSV still lists **`selected_anchor_date`** = **2026-03-31**, but **`valuation_mode`** = **`market_fallback`**, **`anchor_used`** = false, **`anchor_status`** = **`stale`**, and **`anchor_error_message`** states the stale rule.
+
+Regression: `tests/test_reviewed_anchor_timeline_backtest.py`.
+
+---
+
 ## Example raw CSV rows
 
 **Draft (not for production anchor_adjusted until promoted):**
@@ -138,4 +167,5 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 
 - Selection + stale + validation: `src/vnm_valuation/valuation.py`
 - Raw → processed build: `scripts/build_vnm_anchor_valuation.py`
-- Tests: `tests/test_reviewed_anchor_regression.py`, `tests/test_reviewed_anchor_e2e.py`, `tests/test_anchor_fallback_e2e.py`
+- Tests: `tests/test_reviewed_anchor_regression.py`, `tests/test_reviewed_anchor_e2e.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`
+- Deterministic mini backtest: `src/vnm_valuation/mini_backtest.py`, `scripts/run_reviewed_anchor_timeline_backtest.py`
