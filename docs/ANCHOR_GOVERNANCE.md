@@ -116,6 +116,20 @@ python scripts/run_local_valuation.py --as-of-date 2026-04-16
 
 ---
 
+## Deterministic anchor audit exports (summary)
+
+These are **offline** utilities: fixed inputs (see `src/vnm_valuation/deterministic_inputs.py`), **`run_daily_valuation`** where applicable, and CSVs under **`output/`** (typically git-ignored—re-run to refresh). They do **not** replace the production pipeline or change valuation rules.
+
+| Utility | What it is for | Run | Output CSV |
+|---------|----------------|-----|------------|
+| **Reviewed timeline mini-backtest** | Broad date sweep on the **reviewed** anchor timeline: selection, **`anchor_used`**, **`valuation_mode`**, messages — same spirit as a multi-date regression check. | `python scripts/run_reviewed_anchor_timeline_backtest.py` | `output/reviewed_anchor_timeline_backtest.csv` |
+| **Anchor freshness audit** | **Coverage and lag**: which anchor is latest on/before each date, **`anchor_age_days`** vs **`stale_cutoff_days`**, and whether production reports **`stale`**. | `python scripts/run_anchor_freshness_audit.py` | `output/anchor_freshness_audit.csv` |
+| **Anchor fallback reason audit** | **Why fallback**: named scenarios (including fixtures for unvalidated / missing) with a normalized **`fallback_reason`** bucket aligned to **`anchor_status`**. | `python scripts/run_anchor_fallback_reason_audit.py` | `output/anchor_fallback_reason_audit.csv` |
+
+Implementation references: `src/vnm_valuation/mini_backtest.py` (timeline sweep), `src/vnm_valuation/anchor_freshness_audit.py`, `src/vnm_valuation/anchor_fallback_reason_audit.py`. Tests: `tests/test_reviewed_anchor_timeline_backtest.py`, `tests/test_anchor_freshness_audit.py`, `tests/test_anchor_fallback_reason_audit.py`.
+
+---
+
 ## Reviewed timeline mini backtest (deterministic export)
 
 Offline sweep over fixed **`as_of_date`** values using deterministic market / FX / input-cost inputs and the reviewed anchor timeline (aligned with **`data/raw/vnm_anchor_valuation.csv`**, including reviewed snapshots from **2024** onward). Writes one **audit CSV** per run so you can confirm **latest-on-or-before** selection and **stale** / **validation** behavior without opening pipeline outputs under **`data/processed/`** or **`data/output/`**.
