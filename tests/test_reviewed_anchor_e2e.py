@@ -7,8 +7,6 @@ without writing to the repo's data/processed/ tree.
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
 import pandas as pd
@@ -25,11 +23,8 @@ from tests.reviewed_anchor_fixtures import (
     REVIEWED_VALUATION_DATE,
     fx_and_cost_dataframes,
     market_dataframe,
+    run_anchor_builder,
 )
-
-
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[1]
 
 
 def _raw_csv_reviewed_snapshot() -> str:
@@ -46,23 +41,7 @@ def test_e2e_raw_anchor_build_then_valuation(tmp_path: Path):
     raw_path = tmp_path / "vnm_anchor_valuation.csv"
     raw_path.write_text(_raw_csv_reviewed_snapshot(), encoding="utf-8")
     out_parquet = tmp_path / "vnm_anchor_valuation.parquet"
-
-    repo = _repo_root()
-    script = repo / "scripts" / "build_vnm_anchor_valuation.py"
-    proc = subprocess.run(
-        [
-            sys.executable,
-            str(script),
-            "--input",
-            str(raw_path),
-            "--output",
-            str(out_parquet),
-        ],
-        cwd=str(repo),
-        capture_output=True,
-        text=True,
-    )
-    assert proc.returncode == 0, proc.stdout + "\n" + proc.stderr
+    run_anchor_builder(raw_path=raw_path, out_parquet=out_parquet)
 
     built = pd.read_parquet(out_parquet)
     assert not built.empty

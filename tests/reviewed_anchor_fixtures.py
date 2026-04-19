@@ -4,6 +4,10 @@ Shared deterministic inputs for reviewed-anchor regression and end-to-end tests.
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -63,6 +67,35 @@ def fx_and_cost_dataframes() -> tuple[pd.DataFrame, pd.DataFrame]:
         }
     )
     return fx_df, input_cost_df
+
+
+def repo_root() -> Path:
+    """Project root (parent of `tests/`)."""
+    return Path(__file__).resolve().parents[1]
+
+
+def run_anchor_builder(*, raw_path: Path, out_parquet: Path) -> None:
+    """
+    Run `scripts/build_vnm_anchor_valuation.py` with --input/--output into temp paths.
+    Used by positive and negative anchor E2E tests (no writes under repo data/).
+    """
+    root = repo_root()
+    script = root / "scripts" / "build_vnm_anchor_valuation.py"
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--input",
+            str(raw_path),
+            "--output",
+            str(out_parquet),
+        ],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stdout + "\n" + proc.stderr)
 
 
 def processed_style_anchor_dataframe() -> pd.DataFrame:
