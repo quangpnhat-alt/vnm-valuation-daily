@@ -48,7 +48,7 @@ If **`anchor_validated` is missing or empty**, validation falls back to **rules*
 | 3 | Analyst | For an approved snapshot: set **`anchor_validated=true`**, update **`source`** / **`notes`** so they read as **production** (remove unintended **placeholder** wording if you rely on keyword validation). |
 | 4 | Build | Rebuild processed parquet (**required** after any raw change). |
 | 5 | Verify | Run valuation for a realistic **`as_of_date`**; confirm **`anchor_adjusted`** vs **`market_fallback`** (see verification table). |
-| 6 | Optional | Run **`pytest`** so anchor regression, e2e, timeline mini-backtest, and freshness audit tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`, `tests/test_anchor_freshness_audit.py`). |
+| 6 | Optional | Run **`pytest`** so anchor regression, e2e, timeline mini-backtest, freshness audit, and fallback reason audit tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`, `tests/test_anchor_freshness_audit.py`, `tests/test_anchor_fallback_reason_audit.py`). |
 
 ---
 
@@ -167,6 +167,27 @@ Regression: `tests/test_anchor_freshness_audit.py`.
 
 ---
 
+## Anchor fallback reason audit (deterministic export)
+
+Offline **why did we fall back?** sweep: named scenarios (reviewed used, reviewed stale, explicit unvalidated fixture, future-only / missing-on-or-before) each run **`run_daily_valuation`** once. The CSV adds **`fallback_reason`**, a small normalized label derived from **`anchor_status`** (`used`, `stale`, `unvalidated`, `missing`, or `other_error` for unexpected statuses such as `invalid`). It does **not** re-implement validation or stale rules.
+
+From the project root (after `pip install -e .` if needed):
+
+```bash
+python scripts/run_anchor_fallback_reason_audit.py
+```
+
+Output: **`output/anchor_fallback_reason_audit.csv`** (generated; re-run to refresh).
+
+How to read it:
+
+- **`fallback_reason`**: audit bucket aligned with **`anchor_status`** from the same row (`used` when the anchor path succeeded; otherwise matches **`stale` / `unvalidated` / `missing`** when valuation reports those statuses).
+- **`anchor_error_message`**: empty when **`fallback_reason`** is **`used`**; otherwise the same explanation string production would surface.
+
+Regression: `tests/test_anchor_fallback_reason_audit.py`.
+
+---
+
 ## Example raw CSV rows
 
 **Draft (not for production anchor_adjusted until promoted):**
@@ -192,3 +213,4 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 - Tests: `tests/test_reviewed_anchor_regression.py`, `tests/test_reviewed_anchor_e2e.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`
 - Deterministic mini backtest: `src/vnm_valuation/mini_backtest.py`, `scripts/run_reviewed_anchor_timeline_backtest.py`
 - Anchor freshness audit: `src/vnm_valuation/anchor_freshness_audit.py`, `scripts/run_anchor_freshness_audit.py`
+- Anchor fallback reason audit: `src/vnm_valuation/anchor_fallback_reason_audit.py`, `scripts/run_anchor_fallback_reason_audit.py`
