@@ -232,6 +232,8 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 
 `scripts/run_vnm_daily_pipeline.py` runs valuation once, then exports (Excel by default, optional `--to-gsheet`) without duplicating the valuation step.
 
+`scripts/backfill_vnm_history_to_excel.py` sweeps a date range into the same Excel workbook (default start **2015-01-01**), upserting each successful day; days without market data are skipped in the summary.
+
 ---
 
 ## Related code (read-only reference)
@@ -245,3 +247,4 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 - Google Sheets publish: `src/vnm_valuation/google_sheets_publish.py`, `scripts/publish_vnm_daily_to_gsheet.py`
 - Excel export: `src/vnm_valuation/excel_daily_export.py`, `scripts/export_vnm_daily_to_excel.py`
 - Daily pipeline (valuation + exports): `src/vnm_valuation/daily_pipeline.py`, `scripts/run_vnm_daily_pipeline.py`
+- Excel history backfill: `src/vnm_valuation/excel_history_backfill.py`, `scripts/backfill_vnm_history_to_excel.py`

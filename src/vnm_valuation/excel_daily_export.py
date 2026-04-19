@@ -85,6 +85,11 @@ def _read_all_sheets(path: Path) -> dict[str, pd.DataFrame]:
         return {sn: pd.read_excel(path, sheet_name=sn, dtype=object) for sn in xl.sheet_names}
 
 
+def read_excel_workbook(path: Path) -> dict[str, pd.DataFrame]:
+    """Load every worksheet from an .xlsx into DataFrames."""
+    return _read_all_sheets(path)
+
+
 def write_all_sheets(path: Path, book: dict[str, pd.DataFrame]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(path, engine="openpyxl") as writer:

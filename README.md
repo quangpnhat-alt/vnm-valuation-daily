@@ -80,6 +80,16 @@ python scripts/run_vnm_daily_pipeline.py --dry-run --as-of-date 2026-04-16 --to-
 
 Use `--no-excel` to skip the workbook, `--best-effort-gsheet` to keep Excel success if Sheets fails or is misconfigured. See **`docs/ANCHOR_GOVERNANCE.md`**.
 
+## Historical Excel backfill
+
+Fill the **same** workbook (`output/vnm_daily_valuation.xlsx`, sheet `daily_valuation`) with one row per calendar day from **2015-01-01** through the **latest market date** (skips days where valuation cannot run, e.g. missing prices). Re-runs are **idempotent** (`as_of_date` + `ticker` update in place). Other worksheets are preserved.
+
+```bash
+python scripts/backfill_vnm_history_to_excel.py --start-date 2015-01-01
+python scripts/backfill_vnm_history_to_excel.py --start-date 2026-04-01 --end-date 2026-04-30 --dry-run
+python scripts/backfill_vnm_history_to_excel.py --start-date 2026-04-14 --end-date 2026-04-16 --limit 5
+```
+
 ## Folders
 - `config/`: YAML configuration
 - `data/raw/`: raw inputs (manual drops or pulls)
