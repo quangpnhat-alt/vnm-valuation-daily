@@ -1,0 +1,6 @@
+valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_validated
+2024-03-15,VNM,95000,98000,96000,Q1-2024 workbook,placeholder series,false
+2024-09-30,VNM,97000,100000,99000,Q3-2024 workbook,placeholder series,false
+2025-03-31,VNM,67500,69200,68100,Q1-2025 equity model (v2),Reviewed FY24 close; Street sense-check about 65k-72k VND; approved snapshot,true
+2025-09-30,VNM,68200,69800,68800,Q3-2025 equity model (v2),H1/H2 bridge review sign-off 2025-10-18; approved snapshot,true
+2026-03-31,VNM,69800,71200,70600,Q1-2026 equity model (v3),DCF and rel-val review sign-off 2026-04-15; Street cross-check band about 68k-78k VND; approved production anchor snapshot,true
