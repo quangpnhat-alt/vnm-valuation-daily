@@ -13,6 +13,8 @@ import pandas as pd
 
 from vnm_valuation.deterministic_inputs import (
     REVIEWED_ANCHOR_FAIR_VALUE,
+    REVIEWED_FAIR_2024_03_31,
+    REVIEWED_FAIR_2024_09_30,
     REVIEWED_FAIR_2025_03_31,
     REVIEWED_FAIR_2025_09_30,
     fx_and_cost_dataframes_wide,

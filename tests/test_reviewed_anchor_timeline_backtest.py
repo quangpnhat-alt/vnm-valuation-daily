@@ -20,6 +20,8 @@ def test_timeline_backtest_export_shape_and_selection():
 
     by = df.set_index("as_of_date")
 
+    assert by.loc["2024-04-15", "selected_anchor_date"] == "2024-03-31"
+    assert by.loc["2024-10-15", "selected_anchor_date"] == "2024-09-30"
     assert by.loc["2025-04-10", "selected_anchor_date"] == "2025-03-31"
     assert by.loc["2025-07-15", "selected_anchor_date"] == "2025-03-31"
     assert by.loc["2025-10-15", "selected_anchor_date"] == "2025-09-30"
@@ -34,7 +36,15 @@ def test_timeline_backtest_export_shape_and_selection():
     assert pd.isna(late["anchor_fair_value"])
     assert str(late["anchor_error_message"] or "").lower().find("stale") >= 0
 
-    for d in ["2025-04-10", "2025-07-15", "2025-10-15", "2026-01-15", "2026-04-16"]:
+    for d in [
+        "2024-04-15",
+        "2024-10-15",
+        "2025-04-10",
+        "2025-07-15",
+        "2025-10-15",
+        "2026-01-15",
+        "2026-04-16",
+    ]:
         row = by.loc[d]
         assert row["valuation_mode"] == "anchor_adjusted"
         assert bool(row["anchor_used"]) is True

@@ -11,6 +11,8 @@ import pandas as pd
 from vnm_valuation.deterministic_inputs import (
     DEFAULT_BACKTEST_CLOSE,
     REVIEWED_ANCHOR_FAIR_VALUE,
+    REVIEWED_FAIR_2024_03_31,
+    REVIEWED_FAIR_2024_09_30,
     REVIEWED_FAIR_2025_03_31,
     REVIEWED_FAIR_2025_09_30,
     fx_and_cost_dataframes_wide,
@@ -28,6 +30,8 @@ DEFAULT_SWEEP_DATES: list[str] = [
 ]
 
 DEFAULT_TIMELINE_SWEEP_DATES: list[str] = [
+    "2024-04-15",
+    "2024-10-15",
     "2025-04-10",
     "2025-07-15",
     "2025-10-15",
@@ -119,6 +123,8 @@ def write_mini_backtest_csv(path: Path | str, df: pd.DataFrame) -> Path:
 def expected_anchor_fair_value_for_selected_date(selected_iso: str) -> float | None:
     """Maps selected snapshot date to blended fair value for test assertions."""
     m = {
+        "2024-03-31": REVIEWED_FAIR_2024_03_31,
+        "2024-09-30": REVIEWED_FAIR_2024_09_30,
         "2025-03-31": REVIEWED_FAIR_2025_03_31,
         "2025-09-30": REVIEWED_FAIR_2025_09_30,
         "2026-03-31": REVIEWED_ANCHOR_FAIR_VALUE,

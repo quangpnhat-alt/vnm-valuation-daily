@@ -13,6 +13,8 @@ from vnm_valuation.valuation import run_daily_valuation
 from tests.reviewed_anchor_fixtures import (
     CLOSE_2026_04_16,
     REVIEWED_ANCHOR_FAIR_VALUE,
+    REVIEWED_FAIR_2024_03_31,
+    REVIEWED_FAIR_2024_09_30,
     REVIEWED_FAIR_2025_03_31,
     REVIEWED_FAIR_2025_09_30,
     fx_and_cost_dataframes_wide,
@@ -24,9 +26,11 @@ from tests.reviewed_anchor_fixtures import (
 @pytest.mark.parametrize(
     "as_of_date,expected_anchor_fair_value",
     [
-        ("2025-04-10", REVIEWED_FAIR_2025_03_31),  # shortly after 2025-03-31
-        ("2025-10-15", REVIEWED_FAIR_2025_09_30),  # shortly after 2025-09-30
-        ("2026-04-16", REVIEWED_ANCHOR_FAIR_VALUE),  # current regression as_of
+        ("2024-04-20", REVIEWED_FAIR_2024_03_31),
+        ("2024-11-01", REVIEWED_FAIR_2024_09_30),
+        ("2025-04-10", REVIEWED_FAIR_2025_03_31),
+        ("2025-10-15", REVIEWED_FAIR_2025_09_30),
+        ("2026-04-16", REVIEWED_ANCHOR_FAIR_VALUE),
     ],
 )
 def test_reviewed_snapshot_selected_for_as_of_across_timeline(as_of_date: str, expected_anchor_fair_value: float):
@@ -46,8 +50,7 @@ def test_reviewed_snapshot_selected_for_as_of_across_timeline(as_of_date: str, e
 
 def test_stale_fallback_when_reviewed_snapshot_too_old_and_no_newer_row():
     """
-    With only snapshots through 2026-03-31, a late `as_of` triggers stale protection
-    (>365 days since anchor date).
+    Latest snapshot on/before a far `as_of` is still 2026-03-31; age vs as_of exceeds stale threshold.
     """
     anchor_df = reviewed_snapshot_timeline_dataframe()
     as_of_late = "2028-06-01"

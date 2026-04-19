@@ -28,10 +28,10 @@ from tests.reviewed_anchor_fixtures import (
 
 
 def _raw_csv_reviewed_snapshot() -> str:
-    """Minimal multi-row raw file: older row + reviewed 2026-03-31 (method inputs blend to 70380)."""
+    """Minimal multi-row raw file: reviewed 2024-03-31 + reviewed 2026-03-31 (blends match deterministic inputs)."""
     return (
         "valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_validated\n"
-        "2024-03-15,VNM,95000,98000,96000,Q1-2024 workbook,placeholder series,false\n"
+        "2024-03-31,VNM,65500,66800,66100,Q1-2024 equity model (v1),Reviewed FY23 close; approved snapshot,true\n"
         f"2026-03-31,VNM,69800,71200,70600,Q1-2026 equity model (v3),"
         f"approved production anchor snapshot,true\n"
     )

@@ -118,7 +118,7 @@ python scripts/run_local_valuation.py --as-of-date 2026-04-16
 
 ## Reviewed timeline mini backtest (deterministic export)
 
-Offline sweep over fixed **`as_of_date`** values using deterministic market / FX / input-cost inputs and the reviewed anchor timeline (aligned with **`data/raw/vnm_anchor_valuation.csv`**). Writes one **audit CSV** per run so you can confirm **latest-on-or-before** selection and **stale** / **validation** behavior without opening pipeline outputs under **`data/processed/`** or **`data/output/`**.
+Offline sweep over fixed **`as_of_date`** values using deterministic market / FX / input-cost inputs and the reviewed anchor timeline (aligned with **`data/raw/vnm_anchor_valuation.csv`**, including reviewed snapshots from **2024** onward). Writes one **audit CSV** per run so you can confirm **latest-on-or-before** selection and **stale** / **validation** behavior without opening pipeline outputs under **`data/processed/`** or **`data/output/`**.
 
 From the project root (after `pip install -e .` if needed):
 
