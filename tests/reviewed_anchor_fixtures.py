@@ -23,8 +23,13 @@ FINAL_FAIR_VALUE_ABS_TOL = 1.5
 
 
 def market_dataframe() -> pd.DataFrame:
+    return market_dataframe_for(AS_OF, close=CLOSE_2026_04_16)
+
+
+def market_dataframe_for(as_of: str, *, close: float) -> pd.DataFrame:
+    """Market row for a single `as_of` date (used by positive and fallback e2e tests)."""
     return pd.DataFrame(
-        [{"date": AS_OF, "ticker": "VNM", "close": CLOSE_2026_04_16, "currency": "VND"}]
+        [{"date": as_of, "ticker": "VNM", "close": float(close), "currency": "VND"}]
     )
 
 
