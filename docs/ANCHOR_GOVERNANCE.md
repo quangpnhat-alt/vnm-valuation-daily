@@ -220,6 +220,18 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 
 ---
 
+## Google Sheets publish (optional export)
+
+`scripts/publish_vnm_daily_to_gsheet.py` runs **`run_daily_valuation`** on local processed inputs (same as `run_local_valuation.py`) and upserts one row into a configured spreadsheet. This is an **operational export layer** only; it does not change valuation, stale, or validation rules. Set **`GOOGLE_SERVICE_ACCOUNT_JSON`**, **`VNM_GSHEET_SPREADSHEET_ID`**, and optionally **`VNM_GSHEET_WORKSHEET`**; do not commit credentials or IDs. Rows include **`valuation_mode`**, **`anchor_status`**, and **`anchor_error_message`** so **`market_fallback`** runs remain visible in the sheet.
+
+---
+
+## Excel workbook export (optional, local)
+
+`scripts/export_vnm_daily_to_excel.py` performs the same **upsert-by-(as_of_date, ticker)** pattern into **`output/vnm_daily_valuation.xlsx`** (by default), without cloud credentials—useful as a parallel or offline-friendly export. It does not change valuation rules.
+
+---
+
 ## Related code (read-only reference)
 
 - Selection + stale + validation: `src/vnm_valuation/valuation.py`
@@ -228,3 +240,5 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 - Deterministic mini backtest: `src/vnm_valuation/mini_backtest.py`, `scripts/run_reviewed_anchor_timeline_backtest.py`
 - Anchor freshness audit: `src/vnm_valuation/anchor_freshness_audit.py`, `scripts/run_anchor_freshness_audit.py`
 - Anchor fallback reason audit: `src/vnm_valuation/anchor_fallback_reason_audit.py`, `scripts/run_anchor_fallback_reason_audit.py`
+- Google Sheets publish: `src/vnm_valuation/google_sheets_publish.py`, `scripts/publish_vnm_daily_to_gsheet.py`
+- Excel export: `src/vnm_valuation/excel_daily_export.py`, `scripts/export_vnm_daily_to_excel.py`

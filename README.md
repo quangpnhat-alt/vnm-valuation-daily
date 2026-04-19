@@ -1,11 +1,11 @@
 # VNM Daily Valuation (Local MVP)
 
-Local daily valuation MVP for **VNM (Vinamilk)**. This repo is **local-first** (pandas + parquet + YAML) and is designed to run end-to-end on a laptop, publishing to Google Sheets only as a final optional step.
+Local daily valuation MVP for **VNM (Vinamilk)**. This repo is **local-first** (pandas + parquet + YAML) and is designed to run end-to-end on a laptop. Optional **exports** include Google Sheets (when configured) and a **local Excel workbook** as a parallel or offline-friendly path.
 
 ## What this repo will do (MVP)
 - Load local input data (prices, FX if needed, shares outstanding, etc.)
 - Produce a daily valuation table saved locally (parquet)
-- Publish the final table to Google Sheets
+- Optionally export the daily row to **Google Sheets** and/or **Excel** (`output/vnm_daily_valuation.xlsx` by default)
 
 ## Quickstart
 Run from the project root (after editable install):
@@ -32,6 +32,34 @@ Deterministic **offline** exports that exercise anchor timeline selection, stale
 | Anchor fallback reason audit | `python scripts/run_anchor_fallback_reason_audit.py` | `output/anchor_fallback_reason_audit.csv` | Normalized fallback reasons (e.g. stale, unvalidated, missing) from real valuation outcomes. |
 
 CSVs under `output/` are generated artifacts—delete or re-run anytime. For governance detail and field meanings, see **`docs/ANCHOR_GOVERNANCE.md`**.
+
+## Google Sheets (optional publish)
+
+Separate **export** step: push one daily valuation row to a spreadsheet (does not change valuation logic). Configure with environment variables—**never commit** credential JSON or spreadsheet IDs.
+
+| Variable | Purpose |
+|----------|---------|
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Filesystem path to the service account JSON key |
+| `VNM_GSHEET_SPREADSHEET_ID` | Target spreadsheet ID |
+| `VNM_GSHEET_WORKSHEET` | Worksheet/tab name (optional; default `daily_valuation`) |
+
+```bash
+python scripts/publish_vnm_daily_to_gsheet.py --as-of-date 2026-04-16
+python scripts/publish_vnm_daily_to_gsheet.py --dry-run --as-of-date 2026-04-16   # local valuation only; no API calls
+```
+
+Requires the same processed inputs under `data/processed/` as `scripts/run_local_valuation.py`. Writes are **idempotent** by `as_of_date` + `ticker` (updates an existing row or appends). See **`docs/ANCHOR_GOVERNANCE.md`** for details.
+
+## Excel (local daily export)
+
+Parallel **file-based** export: one row per run into a workbook under **`output/`** (default **`output/vnm_daily_valuation.xlsx`**, worksheet **`daily_valuation`**). No cloud credentials; safe for daily runs when Sheets is unavailable. Same idempotency rule as Sheets (`as_of_date` + `ticker`).
+
+```bash
+python scripts/export_vnm_daily_to_excel.py --as-of-date 2026-04-16
+python scripts/export_vnm_daily_to_excel.py --dry-run --as-of-date 2026-04-16
+```
+
+Use `--output PATH` and `--worksheet NAME` to override defaults.
 
 ## Folders
 - `config/`: YAML configuration
