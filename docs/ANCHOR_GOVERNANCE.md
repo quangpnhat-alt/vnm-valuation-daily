@@ -39,13 +39,30 @@ If **`anchor_validated` is missing or empty**, validation falls back to **rules*
 
 ---
 
-## Draft → review → promote
+## Workflow: draft → review → promote
 
-1. **Draft:** Add or edit rows in `data/raw/vnm_anchor_valuation.csv` with **`anchor_validated=false`** and/or draft wording in `notes`/`source` (avoid promoting until reviewed).
-2. **Review:** Use the checklist below; confirm units, sources, and reasonableness vs market.
-3. **Promote:** Set **`anchor_validated=true`** for the approved snapshot row; update `notes`/`source` so they do not contain unintended draft markers (e.g. remove `placeholder` text if you rely on keyword rules).
-4. **Rebuild** processed parquet (required).
-5. **Verify** a test run uses **`anchor_adjusted`** (see below).
+| Step | Owner / action | What to do |
+|------|------------------|------------|
+| 1 | Analyst | Add or edit rows in `data/raw/vnm_anchor_valuation.csv` with **`anchor_validated=false`** for drafts, or leave notes/source in clearly draft form. |
+| 2 | Reviewer | Walk the **review checklist** (below); confirm units (VND/share), model version, and reasonableness vs market and external references. |
+| 3 | Analyst | For an approved snapshot: set **`anchor_validated=true`**, update **`source`** / **`notes`** so they read as **production** (remove unintended **placeholder** wording if you rely on keyword validation). |
+| 4 | Build | Rebuild processed parquet (**required** after any raw change). |
+| 5 | Verify | Run valuation for a realistic **`as_of_date`**; confirm **`anchor_adjusted`** vs **`market_fallback`** (see verification table). |
+| 6 | Optional | Run **`pytest`** so anchor regression and e2e tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`). |
+
+---
+
+## Review checklist (per snapshot)
+
+Use this **before** setting **`anchor_validated=true`**:
+
+- [ ] **`valuation_date`** matches the model freeze / reporting cut you intend (e.g. quarter-end).
+- [ ] **`dcf_value`**, **`ev_ebitda_value`**, **`pe_value`** use the **same unit** (typically VND/share) and the same share count / dilution assumptions across methods.
+- [ ] **`source`** names a specific artefact (workbook name, version, path, or ticket).
+- [ ] **`notes`** record material assumptions and, if fair value is far from spot, **why** (judgment, not only the model).
+- [ ] **External sense-check** (e.g. vs broker range or your house view) is **noted** when used.
+- [ ] No accidental **`placeholder`** text in **`notes`** / **`source`** unless the row must stay **non-production**.
+- [ ] After promotion, **rebuild** parquet and spot-check one **`as_of_date`** (and CI tests if applicable).
 
 ---
 
@@ -58,17 +75,6 @@ If **`anchor_validated` is missing or empty**, validation falls back to **rules*
 
 ---
 
-## Review checklist (one snapshot)
-
-- [ ] `valuation_date` matches the intended reporting / model freeze.
-- [ ] Method inputs share the same unit convention (VND/share).
-- [ ] `source` points to a specific workbook/file/version.
-- [ ] Large gaps vs market price are **acknowledged** in `notes` (judgment call, not automatic).
-- [ ] **`anchor_validated=true`** only after sign-off.
-- [ ] Rebuild processed parquet and spot-check one `as_of_date`.
-
----
-
 ## Rebuild processed anchor parquet
 
 From the project root (after `pip install -e .` if you use package imports):
@@ -77,13 +83,14 @@ From the project root (after `pip install -e .` if you use package imports):
 python scripts/build_vnm_anchor_valuation.py
 ```
 
-Optional input path:
+Optional paths:
 
 ```bash
 python scripts/build_vnm_anchor_valuation.py --input data/raw/vnm_anchor_valuation.csv
+python scripts/build_vnm_anchor_valuation.py --input data/raw/vnm_anchor_valuation.csv --output data/processed/vnm_anchor_valuation.parquet
 ```
 
-Output: `data/processed/vnm_anchor_valuation.parquet` (one row per `valuation_date`, sorted ascending).
+Default output: `data/processed/vnm_anchor_valuation.parquet` (one row per `valuation_date`, sorted ascending).
 
 ---
 
@@ -104,6 +111,8 @@ Example run:
 ```bash
 python scripts/run_local_valuation.py --as-of-date 2026-04-16
 ```
+
+**Fallback smoke-checks (non-exhaustive):** placeholder in **`notes`** / **`source`**, explicit **`anchor_validated=false`**, anchor older than **365** days vs `as_of_date`, or no row **on or before** `as_of_date` → expect **`market_fallback`** with a non-empty **`anchor_error_message`**.
 
 ---
 
@@ -129,3 +138,4 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 
 - Selection + stale + validation: `src/vnm_valuation/valuation.py`
 - Raw → processed build: `scripts/build_vnm_anchor_valuation.py`
+- Tests: `tests/test_reviewed_anchor_regression.py`, `tests/test_reviewed_anchor_e2e.py`, `tests/test_anchor_fallback_e2e.py`
