@@ -230,6 +230,8 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 
 `scripts/export_vnm_daily_to_excel.py` performs the same **upsert-by-(as_of_date, ticker)** pattern into **`output/vnm_daily_valuation.xlsx`** (by default), without cloud credentials—useful as a parallel or offline-friendly export. It does not change valuation rules.
 
+`scripts/run_vnm_daily_pipeline.py` runs valuation once, then exports (Excel by default, optional `--to-gsheet`) without duplicating the valuation step.
+
 ---
 
 ## Related code (read-only reference)
@@ -242,3 +244,4 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 - Anchor fallback reason audit: `src/vnm_valuation/anchor_fallback_reason_audit.py`, `scripts/run_anchor_fallback_reason_audit.py`
 - Google Sheets publish: `src/vnm_valuation/google_sheets_publish.py`, `scripts/publish_vnm_daily_to_gsheet.py`
 - Excel export: `src/vnm_valuation/excel_daily_export.py`, `scripts/export_vnm_daily_to_excel.py`
+- Daily pipeline (valuation + exports): `src/vnm_valuation/daily_pipeline.py`, `scripts/run_vnm_daily_pipeline.py`

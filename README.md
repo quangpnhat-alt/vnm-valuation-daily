@@ -61,6 +61,25 @@ python scripts/export_vnm_daily_to_excel.py --dry-run --as-of-date 2026-04-16
 
 Use `--output PATH` and `--worksheet NAME` to override defaults.
 
+## Daily pipeline (valuation + exports)
+
+Single entrypoint: run **`run_daily_valuation` once**, then export (Excel **on** by default; Google Sheets **only** with `--to-gsheet`). Same processed inputs as `run_local_valuation.py`.
+
+**Excel only (typical local daily):**
+
+```bash
+python scripts/run_vnm_daily_pipeline.py --as-of-date 2026-04-16
+```
+
+**Excel + Google Sheets** (requires env vars; use `--dry-run` to preview without writes/API calls):
+
+```bash
+python scripts/run_vnm_daily_pipeline.py --as-of-date 2026-04-16 --to-gsheet
+python scripts/run_vnm_daily_pipeline.py --dry-run --as-of-date 2026-04-16 --to-gsheet
+```
+
+Use `--no-excel` to skip the workbook, `--best-effort-gsheet` to keep Excel success if Sheets fails or is misconfigured. See **`docs/ANCHOR_GOVERNANCE.md`**.
+
 ## Folders
 - `config/`: YAML configuration
 - `data/raw/`: raw inputs (manual drops or pulls)
