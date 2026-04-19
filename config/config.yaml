@@ -1,0 +1,18 @@
+project:
+  ticker: VNM
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  output_dir: data/output
+
+inputs:
+  # Placeholder names; we will define schemas later.
+  prices_file: data/raw/vnm_prices.csv
+
+google_sheets:
+  enabled: false
+  # Fill these later when wiring the publisher.
+  spreadsheet_id: ""
+  worksheet_name: "daily_valuation"
+  credentials_json_path: ""
