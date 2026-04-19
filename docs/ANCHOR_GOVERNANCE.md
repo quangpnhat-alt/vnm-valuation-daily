@@ -48,7 +48,7 @@ If **`anchor_validated` is missing or empty**, validation falls back to **rules*
 | 3 | Analyst | For an approved snapshot: set **`anchor_validated=true`**, update **`source`** / **`notes`** so they read as **production** (remove unintended **placeholder** wording if you rely on keyword validation). |
 | 4 | Build | Rebuild processed parquet (**required** after any raw change). |
 | 5 | Verify | Run valuation for a realistic **`as_of_date`**; confirm **`anchor_adjusted`** vs **`market_fallback`** (see verification table). |
-| 6 | Optional | Run **`pytest`** so anchor regression, e2e, and timeline mini-backtest tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`). |
+| 6 | Optional | Run **`pytest`** so anchor regression, e2e, timeline mini-backtest, and freshness audit tests stay green (`tests/test_reviewed_anchor_*.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`, `tests/test_anchor_freshness_audit.py`). |
 
 ---
 
@@ -145,6 +145,28 @@ Regression: `tests/test_reviewed_anchor_timeline_backtest.py`.
 
 ---
 
+## Anchor gap / freshness audit (deterministic export)
+
+Focused **coverage and lag** check: for fixed **`as_of_date`** values, records **which reviewed anchor** is selected (latest on or before the date), **age in days** vs `as_of_date`, **`stale_cutoff_days`** (from `STALE_ANCHOR_MAX_AGE_DAYS` in `valuation.py`), and the same **`anchor_status` / `valuation_mode` / `anchor_used` / `anchor_error_message`** fields as a real run — without asserting valuation performance.
+
+From the project root (after `pip install -e .` if needed):
+
+```bash
+python scripts/run_anchor_freshness_audit.py
+```
+
+Output: **`output/anchor_freshness_audit.csv`** (generated; re-run to refresh).
+
+How to read it:
+
+- **`anchor_age_days`**: calendar days from **`selected_anchor_date`** to **`as_of_date`** (deterministic given the timeline).
+- **`is_stale`**: `True` when **`anchor_status`** is **`stale`** (same outcome as production for that run — anchor older than the cutoff vs `as_of_date`).
+- **`stale_cutoff_days`**: copy of the max-age constant for the audit row (compare to **`anchor_age_days`**).
+
+Regression: `tests/test_anchor_freshness_audit.py`.
+
+---
+
 ## Example raw CSV rows
 
 **Draft (not for production anchor_adjusted until promoted):**
@@ -169,3 +191,4 @@ valuation_date,ticker,dcf_value,ev_ebitda_value,pe_value,source,notes,anchor_val
 - Raw → processed build: `scripts/build_vnm_anchor_valuation.py`
 - Tests: `tests/test_reviewed_anchor_regression.py`, `tests/test_reviewed_anchor_e2e.py`, `tests/test_anchor_fallback_e2e.py`, `tests/test_reviewed_anchor_timeline_backtest.py`
 - Deterministic mini backtest: `src/vnm_valuation/mini_backtest.py`, `scripts/run_reviewed_anchor_timeline_backtest.py`
+- Anchor freshness audit: `src/vnm_valuation/anchor_freshness_audit.py`, `scripts/run_anchor_freshness_audit.py`
